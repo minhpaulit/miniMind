@@ -106,7 +106,7 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
   const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType | null>(null);
   const [testStatus, setTestStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
   const [testMessage, setTestMessage] = useState<string>("");
-  
+
   const form = useForm<ConnectionFormValues>({
     resolver: zodResolver(connectionFormSchema),
     defaultValues: {
@@ -122,16 +122,16 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
       if (!selectedConnectionType) {
         throw new Error("Please select a connection type");
       }
-      
+
       // For demo purposes, we'll simulate a successful test after 1.5 seconds
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // In a real app, we would actually test the connection here
       // For this demo, most tests "succeed" except for Gmail if no app password is provided
       if (selectedConnectionType === 'gmail' && (!data.email || !data.app_password)) {
         throw new Error("Invalid Gmail credentials. Please provide both email and app password.");
       }
-      
+
       return { message: `Successfully connected to ${selectedConnectionType}` };
     },
   });
@@ -153,15 +153,15 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
       if (!selectedConnectionType) {
         throw new Error("Please select a connection type");
       }
-      
+
       const selectedService = connectionServices.find(s => s.id === selectedConnectionType);
       if (!selectedService) {
         throw new Error("Invalid connection type");
       }
-      
+
       // In a real app, we would handle OAuth flow or API key validation here
       // For this demo, we'll simulate a successful connection
-      
+
       const connectionData = {
         name: data.name || selectedService.name,
         url: selectedService.url,
@@ -172,7 +172,7 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
           ? JSON.stringify([{ id: data.ticktick_project, name: connectionServices.find(s => s.id === 'ticktick')?.projects?.find(p => p.id === data.ticktick_project)?.name || '' }])
           : null
       };
-      
+
       const res = await apiRequest("POST", "/api/connections", connectionData);
       return await res.json();
     },
@@ -210,8 +210,8 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
     createConnectionMutation.mutate(data);
   }
 
-  const selectedService = selectedConnectionType 
-    ? connectionServices.find(s => s.id === selectedConnectionType) 
+  const selectedService = selectedConnectionType
+    ? connectionServices.find(s => s.id === selectedConnectionType)
     : null;
 
   const resetForm = () => {
@@ -226,36 +226,34 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
       if (!newOpen) resetForm();
       onOpenChange(newOpen);
     }}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <div className="sm:flex sm:items-start">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+
+
+      {!selectedConnectionType ? (
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <div className="sm:flex sm:items-start">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <DialogTitle className="text-lg leading-6 font-medium">Add New Connection</DialogTitle>
+              </div>
             </div>
-            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-              <DialogTitle className="text-lg leading-6 font-medium">Add New Connection</DialogTitle>
-              <DialogDescription className="text-sm text-gray-500">
-                Connect to your preferred apps to deliver your feed content.
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-        
-        {!selectedConnectionType ? (
+          </DialogHeader>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
             {connectionServices.map((service) => (
-              <div 
+              <div
                 key={service.id}
                 className="bg-gray-50 rounded-lg p-4 hover:bg-blue-50 transition-colors cursor-pointer border-2 border-transparent hover:border-primary"
                 onClick={() => setSelectedConnectionType(service.id as ConnectionType)}
               >
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center">
-                    <img 
-                      src={service.icon} 
-                      alt={service.name} 
+                    <img
+                      src={service.icon}
+                      alt={service.name}
                       className="h-8 w-8"
                       onError={(e) => {
                         // Fallback if image fails to load
@@ -271,20 +269,34 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
               </div>
             ))}
           </div>
-        ) : (
-          <Tabs defaultValue="settings" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="settings">Connection Settings</TabsTrigger>
-              <TabsTrigger value="preview">Connection Preview</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="settings">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        </DialogContent>
+      ) : (
+        <DialogContent className="sm:max-w-5xl">
+          <DialogHeader>
+            <div className="sm:flex sm:items-start">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <DialogTitle className="text-lg leading-6 font-medium">Add New Connection</DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column - Form */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    Connection Settings
+                  </h3>
+
                   <h4 className="text-md font-medium text-gray-900 flex items-center">
-                    <img 
-                      src={selectedService?.icon} 
-                      alt={selectedService?.name} 
+                    <img
+                      src={selectedService?.icon}
+                      alt={selectedService?.name}
                       className="h-5 w-5 mr-2"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://placehold.co/32x32?text=" + selectedService?.name?.charAt(0);
@@ -292,7 +304,7 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
                     />
                     Connect to {selectedService?.name}
                   </h4>
-                  
+
                   <FormField
                     control={form.control}
                     name="name"
@@ -306,231 +318,181 @@ export default function ConnectionModal({ open, onOpenChange }: ConnectionModalP
                       </FormItem>
                     )}
                   />
-                  
+
                   {/* Authentication Fields */}
-                  <div className="space-y-4">
-                    <h5 className="text-sm font-medium text-gray-700">Authentication Details</h5>
-                    
-                    {selectedService?.authFields?.map((authField: AuthField) => (
-                      <FormField
-                        key={authField.name}
-                        control={form.control}
-                        name={authField.name as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{authField.label}</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type={authField.type}
-                                placeholder={`Enter ${authField.label.toLowerCase()}`} 
-                                {...field} 
-                              />
-                            </FormControl>
-                            {authField.hint && (
-                              <p className="text-xs text-gray-500 mt-1">{authField.hint}</p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                  
-                  {selectedConnectionType === 'ticktick' && (
+                  {selectedService?.authFields?.map((authField: AuthField) => (
                     <FormField
+                      key={authField.name}
                       control={form.control}
-                      name="ticktick_project"
+                      name={authField.name as any}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Default Project</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a project" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {selectedService?.projects?.map(project => (
-                                <SelectItem key={project.id} value={project.id}>
-                                  {project.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormLabel>{authField.label}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type={authField.type}
+                              placeholder={`Enter ${authField.label.toLowerCase()}`}
+                              {...field}
+                            />
+                          </FormControl>
+                          {authField.hint && (
+                            <p className="text-xs text-gray-500 mt-1">{authField.hint}</p>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  )}
-                  
-                  {/* Test Connection Status */}
-                  {testStatus !== "idle" && (
-                    <Card className={`border ${
-                      testStatus === "testing" ? "border-gray-200" : 
-                      testStatus === "success" ? "border-green-200" : 
-                      "border-red-200"
-                    }`}>
-                      <CardContent className="p-4 flex items-center">
-                        {testStatus === "testing" && <Loader2 className="h-5 w-5 mr-2 text-gray-500 animate-spin" />}
-                        {testStatus === "success" && <CheckCircle2 className="h-5 w-5 mr-2 text-green-500" />}
-                        {testStatus === "error" && <AlertCircle className="h-5 w-5 mr-2 text-red-500" />}
-                        <p className={`text-sm ${
-                          testStatus === "testing" ? "text-gray-600" : 
-                          testStatus === "success" ? "text-green-600" : 
-                          "text-red-600"
-                        }`}>
-                          {testStatus === "testing" ? "Testing connection..." : testMessage}
+                  ))}
+
+
+                </div>
+
+                {/* Right Column - Preview */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    {/* <Eye className="h-4 w-4 mr-2" /> */}
+                    Preview
+                  </h3>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-4">
+                        <img
+                          src={selectedService?.icon}
+                          alt={selectedService?.name}
+                          className="h-12 w-12 mr-3"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://placehold.co/48x48?text=" + selectedService?.name?.charAt(0);
+                          }}
+                        />
+                        <div>
+                          <h3 className="text-lg font-medium">
+                            {form.watch("name") || `My ${selectedService?.name}`}
+                          </h3>
+                          <div className="flex items-center mt-1">
+                            {testStatus === "success" ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Connected
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                Not Connected
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="grid grid-cols-3 gap-2">
+                          <span className="text-gray-500">Service Type:</span>
+                          <span className="col-span-2 font-medium">{selectedService?.name}</span>
+                        </div>
+
+                        {selectedConnectionType === 'gmail' && (
+                          <div className="grid grid-cols-3 gap-2">
+                            <span className="text-gray-500">Email:</span>
+                            <span className="col-span-2 font-medium">{form.watch("email") || "Not set"}</span>
+                          </div>
+                        )}
+
+                        {selectedConnectionType === 'ticktick' && (
+                          <div className="grid grid-cols-3 gap-2">
+                            <span className="text-gray-500">Project:</span>
+                            <FormField
+                              control={form.control}
+                              name="ticktick_project"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a project" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {selectedService?.projects?.map(project => (
+                                        <SelectItem key={project.id} value={project.id}>
+                                          {project.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <span className="text-gray-500">Status:</span>
+                          <span className="col-span-2 font-medium">
+                            {testStatus === "success" ? "Ready to use" : "Not connected"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-500">
+                          This connection will be used to send your feed content to {selectedService?.name}.
+                          {testStatus !== "success" && " Please test the connection before saving."}
                         </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  <div className="pt-2 flex justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setSelectedConnectionType(null)}
-                    >
-                      Back
-                    </Button>
-                    
-                    <div className="space-x-2">
-                      <Button 
-                        type="button" 
-                        variant="outline"
-                        onClick={testConnection}
-                        disabled={testConnectionMutation.isPending}
-                      >
-                        {testConnectionMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Testing...
-                          </>
-                        ) : (
-                          "Test Connection"
-                        )}
-                      </Button>
-                      
-                      <Button 
-                        type="submit" 
-                        disabled={createConnectionMutation.isPending || testStatus !== "success"}
-                      >
-                        {createConnectionMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Connecting...
-                          </>
-                        ) : (
-                          "Connect"
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </form>
-              </Form>
-            </TabsContent>
-            
-            <TabsContent value="preview">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src={selectedService?.icon}
-                      alt={selectedService?.name}
-                      className="h-12 w-12 mr-3"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placehold.co/48x48?text=" + selectedService?.name?.charAt(0);
-                      }}
-                    />
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {form.watch("name") || `My ${selectedService?.name}`}
-                      </h3>
-                      <div className="flex items-center mt-1">
-                        {testStatus === "success" ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Connected
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            Not Connected
-                          </Badge>
-                        )}
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="grid grid-cols-3 gap-2">
-                      <span className="text-gray-500">Service Type:</span>
-                      <span className="col-span-2 font-medium">{selectedService?.name}</span>
-                    </div>
-                    
-                    {selectedConnectionType === 'gmail' && (
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-gray-500">Email:</span>
-                        <span className="col-span-2 font-medium">{form.watch("email") || "Not set"}</span>
-                      </div>
-                    )}
-                    
-                    {selectedConnectionType === 'ticktick' && (
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-gray-500">Project:</span>
-                        <span className="col-span-2 font-medium">
-                          {selectedService?.projects?.find(p => p.id === form.watch("ticktick_project"))?.name || "Not set"}
-                        </span>
-                      </div>
-                    )}
-                    
-                    <div className="grid grid-cols-3 gap-2">
-                      <span className="text-gray-500">Status:</span>
-                      <span className="col-span-2 font-medium">
-                        {testStatus === "success" ? "Ready to use" : "Not connected"}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500">
-                      This connection will be used to send your feed content to {selectedService?.name}.
-                      {testStatus !== "success" && " Please test the connection before saving."}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <div className="mt-4 flex justify-between">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                    </CardContent>
+                  </Card>
+                </div>
+
+              </div>
+
+              {/* BUTTON SECTION */}
+              <div className="pt-2 flex justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setSelectedConnectionType(null)}
                 >
                   Back
                 </Button>
-                
-                <Button 
-                  onClick={testConnection}
-                  disabled={testConnectionMutation.isPending}
-                >
-                  {testConnectionMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    "Test Connection"
-                  )}
-                </Button>
+
+                <div className="space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={testConnection}
+                    disabled={testConnectionMutation.isPending}
+                  >
+                    {testConnectionMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Testing...
+                      </>
+                    ) : (
+                      "Test Connection"
+                    )}
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    disabled={createConnectionMutation.isPending || testStatus !== "success"}
+                  >
+                    {createConnectionMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      "Connect"
+                    )}
+                  </Button>
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        )}
-      </DialogContent>
+            </form>
+          </Form>
+        </DialogContent>
+      )}
+
     </Dialog>
   );
 }

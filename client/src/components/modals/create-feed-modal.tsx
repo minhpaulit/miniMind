@@ -137,7 +137,7 @@ export default function CreateFeedModal({ open, onOpenChange, connections }: Cre
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-auto">
         <DialogHeader>
           <div className="sm:flex sm:items-start">
             <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
